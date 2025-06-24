@@ -9,6 +9,7 @@ import FeaturedDestinations from "@/components/FeaturedDestinations";
 import CtaSection from "@/components/CtaSection";
 import AppFooter from "@/components/AppFooter";
 import ConsultationModal from "@/components/ConsultationModal";
+import AiChatbot from "@/components/AiChatbot";
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -31,6 +32,7 @@ export default function Home() {
         <AppFooter />
       </div>
       <ConsultationModal isOpen={isModalOpen} onClose={handleCloseModal} />
+      <AiChatbot />
     </>
   );
 }

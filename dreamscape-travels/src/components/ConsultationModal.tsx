@@ -3,6 +3,7 @@
 'use client';
 import React from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Select, SelectItem, CheckboxGroup, Checkbox, Chip, Spinner } from "@nextui-org/react";
+import ReCAPTCHA from "react-google-recaptcha";
 
 type ModalProps = {
     isOpen: boolean;
@@ -18,6 +19,7 @@ type Destination = {
 export default function ConsultationModal({ isOpen, onClose }: ModalProps) {
     const [destinations, setDestinations] = React.useState<Destination[]>([]);
     const [isLoadingDestinations, setIsLoadingDestinations] = React.useState(true);
+    const [recaptchaToken, setRecaptchaToken] = React.useState<string | null>(null);
 
     const [formData, setFormData] = React.useState({
         fullName: '',
@@ -38,6 +40,7 @@ export default function ConsultationModal({ isOpen, onClose }: ModalProps) {
 
     React.useEffect(() => {
         if (isOpen) {
+            setRecaptchaToken(null); // Reset reCAPTCHA on open
             const fetchDestinations = async () => {
                 setIsLoadingDestinations(true);
                 try {
@@ -46,7 +49,6 @@ export default function ConsultationModal({ isOpen, onClose }: ModalProps) {
                     setDestinations(data);
                 } catch (error) {
                     console.error("Failed to fetch destinations:", error);
-                    // Fallback to a static list if the API fails
                     setDestinations([{ key: 'other', label: 'Other (Please specify below)' }]);
                 } finally {
                     setIsLoadingDestinations(false);
@@ -72,6 +74,11 @@ export default function ConsultationModal({ isOpen, onClose }: ModalProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!recaptchaToken) {
+            // This alert can be replaced with a more subtle error message if desired
+            alert("Please complete the reCAPTCHA verification.");
+            return;
+        }
         setSubmissionStatus('loading');
 
         const finalDestinations = [...formData.destinations];
@@ -84,7 +91,7 @@ export default function ConsultationModal({ isOpen, onClose }: ModalProps) {
             const response = await fetch('/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...formData, destination: finalDestinations.join(', ') }),
+                body: JSON.stringify({ ...formData, destination: finalDestinations.join(', '), recaptchaToken }),
             });
 
             if (!response.ok) throw new Error('Network response was not ok');
@@ -99,6 +106,7 @@ export default function ConsultationModal({ isOpen, onClose }: ModalProps) {
         onClose();
         setTimeout(() => {
             setSubmissionStatus('idle');
+            setRecaptchaToken(null);
             setFormData({
                 fullName: '', email: '', phone: '', destinations: [], customDestination: '',
                 startDate: '', endDate: '', adults: '1', children: '0',
@@ -201,7 +209,16 @@ export default function ConsultationModal({ isOpen, onClose }: ModalProps) {
                                         <Checkbox value="tours">Tours & Activities</Checkbox>
                                     </CheckboxGroup>
                                     <Textarea name="comments" label="Additional Information" placeholder="Tell us more about your dream trip!" value={formData.comments} onChange={handleInputChange} />
-                                    <Button color="primary" type="submit" isLoading={submissionStatus === 'loading'}>
+
+                                    <div className="flex justify-center py-2">
+                                        <ReCAPTCHA
+                                            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
+                                            onChange={(token) => setRecaptchaToken(token)}
+                                            onExpired={() => setRecaptchaToken(null)}
+                                        />
+                                    </div>
+
+                                    <Button color="primary" type="submit" isLoading={submissionStatus === 'loading'} isDisabled={!recaptchaToken}>
                                         Submit Request
                                     </Button>
                                 </form>

@@ -5,17 +5,17 @@ import NextLink from "next/link";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 
 type Props = {
-    onOpenModal: () => void;
+    onOpenModal?: () => void;
 };
 
 export default function AppNavbar({ onOpenModal }: Props) {
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
     const menuItems = [
-        { name: "Destinations", href: "#destinations" },
-        { name: "Services", href: "#services" },
-        { name: "About", href: "#about" },
-        { name: "Contact", href: "#contact" },
+        { name: "Destinations", href: "/#destinations" },
+        { name: "Services", href: "/#services" },
+        { name: "About", href: "/#about" },
+        { name: "Contact", href: "/#contact" },
     ];
 
     return (
@@ -52,16 +52,16 @@ export default function AppNavbar({ onOpenModal }: Props) {
                 <NavbarItem className="hidden md:flex">
                     <ThemeSwitcher />
                 </NavbarItem>
-                <NavbarItem className="hidden md:flex">
-                    <Button onClick={onOpenModal} color="primary" variant="ghost" className="font-semibold">
-                        Get a Free Quote
-                    </Button>
-                </NavbarItem>
-                <NavbarItem className="md:hidden">
-                    <Button onClick={onOpenModal} color="primary" variant="ghost" className="font-semibold">
-                        Get a Free Quote
-                    </Button>
-                </NavbarItem>
+                {onOpenModal && (
+                    <>
+                        <NavbarItem className="hidden md:flex">
+                            <Button onPress={onOpenModal} color="primary" variant="ghost" className="font-semibold">Get a Free Quote</Button>
+                        </NavbarItem>
+                        <NavbarItem className="md:hidden">
+                            <Button onPress={onOpenModal} color="primary" variant="ghost" className="font-semibold">Get a Free Quote</Button>
+                        </NavbarItem>
+                    </>
+                )}
                 <NavbarMenuToggle
                     aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                     className="md:hidden"
@@ -71,15 +71,7 @@ export default function AppNavbar({ onOpenModal }: Props) {
             <NavbarMenu>
                 {menuItems.map((item, index) => (
                     <NavbarMenuItem key={`${item.name}-${index}`}>
-                        <Link
-                            color="foreground"
-                            className="w-full"
-                            href={item.href}
-                            size="lg"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            {item.name}
-                        </Link>
+                        <Link color="foreground" className="w-full" href={item.href} size="lg" onPress={() => setIsMenuOpen(false)}>{item.name}</Link>
                     </NavbarMenuItem>
                 ))}
                 <NavbarMenuItem>
