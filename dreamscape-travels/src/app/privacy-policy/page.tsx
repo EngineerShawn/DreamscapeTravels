@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+'use client';
 import AppNavbar from "@/components/AppNavbar";
 import AppFooter from "@/components/AppFooter";
 
@@ -10,8 +11,8 @@ export default function PrivacyPolicyPage() {
             <main className="flex-grow max-w-4xl mx-auto p-8 text-gray-800 dark:text-gray-200">
                 <h1 className="text-4xl font-bold font-serif mb-6">Privacy Policy</h1>
 
-                <section className="mb-6">
-                    <h2 className="text-2xl font-semibold font-serif mb-2">1. Introduction</h2>
+                <section className="mb-6 text-md">
+                    <h2 className="text-xl font-semibold font-serif mb-2">1. Introduction</h2>
                     <p>Welcome to Dreamscape Travels. We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website https://www.dreamscapetravel.com, including any other media form, media channel, mobile website, or mobile application related or connected thereto (collectively, the “Site”). Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.</p>
                 </section>
 
