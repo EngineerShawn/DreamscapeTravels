@@ -2,6 +2,7 @@
   "name": "dreamscape-travels",
   "version": "0.1.0",
   "private": false,
+  "main": "./src/app/layout.tsx",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
