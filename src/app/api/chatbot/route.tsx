@@ -1,24 +1,10 @@
 import { NextResponse } from 'next/server';
-import {
-    GoogleGenerativeAI,
-    Part,
-    FunctionDeclarationSchema,
-} from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType, Part } from "@google/generative-ai";
 import ConsultationEmail from '@/components/ConsultationEmail';
 import { Resend } from 'resend';
 
-// --- INITIALIZE SERVICES ---
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-
-if (!GEMINI_API_KEY) throw new Error('GEMINI_API_KEY is not defined.');
-if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY is not defined.');
-
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const resend = new Resend(RESEND_API_KEY);
-
 // --- DEFINE TYPES ---
-interface ConsultationFormData {
+interface ConsultationRequestArgs {
     fullName: string;
     email: string;
     destination: string;
@@ -31,6 +17,16 @@ interface ConsultationFormData {
     comments?: string;
 }
 
+// --- INITIALIZE SERVICES ---
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+
+if (!GEMINI_API_KEY) throw new Error('GEMINI_API_KEY is not defined.');
+if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY is not defined.');
+
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+const resend = new Resend(RESEND_API_KEY);
+
 // --- DEFINE AI TOOLS (FUNCTION CALLING) ---
 const tools = [
     {
@@ -39,24 +35,24 @@ const tools = [
                 name: "submitConsultationRequest",
                 description: "Submits the user's travel consultation request. Only call this function when all required information has been collected from the user.",
                 parameters: {
-                    type: FunctionDeclarationSchema.Type.OBJECT,
+                    type: SchemaType.OBJECT,
                     properties: {
-                        fullName: { type: FunctionDeclarationSchema.Type.STRING, description: "The user's full name." },
-                        email: { type: FunctionDeclarationSchema.Type.STRING, description: "The user's email address." },
-                        destination: { type: FunctionDeclarationSchema.Type.STRING, description: "The user's desired travel destination(s), as a comma-separated string." },
-                        phone: { type: FunctionDeclarationSchema.Type.STRING, description: "The user's phone number. (Optional)" },
-                        startDate: { type: FunctionDeclarationSchema.Type.STRING, description: "The user's approximate start date for the trip. (Optional)" },
-                        endDate: { type: FunctionDeclarationSchema.Type.STRING, description: "The user's approximate end date for the trip. (Optional)" },
-                        adults: { type: FunctionDeclarationSchema.Type.STRING, description: "The number of adults traveling as a string. (Optional, defaults to '1')" },
-                        children: { type: FunctionDeclarationSchema.Type.STRING, description: "The number of children traveling as a string. (Optional, defaults to '0')" },
-                        budget: { type: FunctionDeclarationSchema.Type.STRING, description: "The user's estimated budget per person. (Optional)" },
-                        comments: { type: FunctionDeclarationSchema.Type.STRING, description: "Any additional comments or requests from the user. (Optional)" },
+                        fullName: { type: SchemaType.STRING, description: "The user's full name." } as const,
+                        email: { type: SchemaType.STRING, description: "The user's email address." } as const,
+                        destination: { type: SchemaType.STRING, description: "The user's desired travel destination(s), as a comma-separated string." } as const,
+                        phone: { type: SchemaType.STRING, description: "The user's phone number. (Optional)" } as const,
+                        startDate: { type: SchemaType.STRING, description: "The user's approximate start date for the trip. (Optional)" } as const,
+                        endDate: { type: SchemaType.STRING, description: "The user's approximate end date for the trip. (Optional)" } as const,
+                        adults: { type: SchemaType.STRING, description: "The number of adults traveling. (Optional, defaults to 1)" } as const,
+                        children: { type: SchemaType.STRING, description: "The number of children traveling. (Optional, defaults to 0)" } as const,
+                        budget: { type: SchemaType.STRING, description: "The user's estimated budget per person. (Optional)" } as const,
+                        comments: { type: SchemaType.STRING, description: "Any additional comments or requests from the user. (Optional)" } as const,
                     },
                     required: ["fullName", "email", "destination"],
                 },
             },
         ],
-    },
+    }
 ];
 
 // --- DEFINE SYSTEM INSTRUCTION ---
@@ -97,7 +93,7 @@ const systemInstruction = {
 // --- API POST HANDLER ---
 export async function POST(request: Request) {
     const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash-latest",
+        model: "gemini-1.5-flash-latest",
         systemInstruction,
         tools,
     });
@@ -107,7 +103,7 @@ export async function POST(request: Request) {
         const lastMessage = messages[messages.length - 1];
 
         // ** FIX: Filter history to be valid **
-        const conversationHistory = messages
+        let conversationHistory = messages
             .slice(0, -1) // Exclude the last message which is the current user input
             .filter((msg: { text: string; }) => msg.text && msg.text.trim() !== ''); // Filter out any messages without text
 
@@ -128,9 +124,9 @@ export async function POST(request: Request) {
         if (functionCalls) {
             const call = functionCalls[0];
             if (call.name === 'submitConsultationRequest') {
-                const { name: _name, ...args } = call;
+                const functionArgs = call.args as ConsultationRequestArgs;
 
-                console.log("Function call detected, submitting consultation:", args);
+                console.log("Function call detected, submitting consultation:", functionArgs);
 
                 const fromEmail = process.env.FROM_EMAIL;
                 const timEmail = process.env.TIM_EMAIL;
@@ -139,21 +135,39 @@ export async function POST(request: Request) {
                     throw new Error("Missing email configuration on the server.");
                 }
 
-                await resend.emails.send({
-                    from: `AI Assistant <${fromEmail}>`,
-                    to: [timEmail],
-                    replyTo: args.email as string,
-                    subject: `AI-Assisted Request: ${args.destination} for ${args.fullName}`,
-                    react: ConsultationEmail(args as ConsultationFormData),
-                });
+                let functionResponsePart: Part;
 
-                // ** FIX: Send the function response back to the model correctly **
-                const functionResponsePart: Part = {
-                    functionResponse: {
-                        name: "submitConsultationRequest",
-                        response: { success: true, message: "The consultation request was sent successfully." }
+                try {
+                    await resend.emails.send({
+                        from: `AI Assistant <${fromEmail}>`,
+                        to: [timEmail],
+                        replyTo: functionArgs.email,
+                        subject: `AI-Assisted Request: ${functionArgs.destination} for ${functionArgs.fullName}`,
+                        react: <ConsultationEmail
+                            {...functionArgs}
+                            phone={functionArgs.phone ?? ""}
+                            startDate={functionArgs.startDate ?? ""}
+                            endDate={functionArgs.endDate ?? ""}
+                            adults={functionArgs.adults ?? ""}
+                            children={functionArgs.children ?? ""}
+                            budget={functionArgs.budget ?? ""}
+                            comments={functionArgs.comments ?? ""}
+                            tripType=""
+                            needs={[]}
+                        />,
+                    });
+
+                    // Create a success response for the model
+                    functionResponsePart = {
+                        functionResponse: { name: "submitConsultationRequest", response: { success: true, message: "The consultation request was sent successfully." } }
+                    };
+                } catch (emailError) {
+                    console.error("Resend API Error:", emailError);
+                    // Create an error response for the model
+                    functionResponsePart = {
+                        functionResponse: { name: "submitConsultationRequest", response: { success: false, message: "There was an internal error and the email could not be sent. Please ask the user to try again later or contact Tim directly." } }
                     }
-                };
+                }
 
                 const finalResult = await chat.sendMessage([functionResponsePart]);
                 return NextResponse.json({ reply: finalResult.response.text() });
