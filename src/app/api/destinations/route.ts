@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import googleTrends from 'google-trends-api';
 
@@ -24,6 +23,20 @@ export async function GET() {
             keyword: string;
         }
 
+interface GoogleTrendsResponse {
+    default: {
+        timelineData: {
+            time: string;
+            formattedTime: string;
+            formattedAxisTime: string;
+            value: number[];
+            hasData: boolean[];
+            formattedValue: string[];
+        }[];
+        averages: number[];
+    };
+}
+
         interface TrendResult {
             key: string;
             label: string;
@@ -37,7 +50,7 @@ export async function GET() {
                 startTime: new Date(Date.now() - (30 * 24 * 60 * 60 * 1000)), // Last 30 days
             })
                 .then((results: string) => {
-                    const parsedResults: any = JSON.parse(results);
+                    const parsedResults: GoogleTrendsResponse = JSON.parse(results);
                     const avgValue: number | undefined = parsedResults.default.averages[0];
                     return { ...dest, popularity: avgValue || Math.floor(Math.random() * 20 + 70) };
                 })

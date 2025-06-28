@@ -1,0 +1,15 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="brand-gradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#2563EB"/>
+            <stop offset="100%" stop-color="#4F46E5"/>
+        </linearGradient>
+    </defs>
+    <circle cx="32" cy="32" r="30" fill="url(#brand-gradient)"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M22 14C19.7909 14 18 15.7909 18 18V46C18 48.2091 19.7909 50 22 50H34C44.4934 50 53 41.4934 53 31V20C53 16.6863 50.3137 14 47 14H22ZM34 18C42.2843 18 49 24.7157 49 33C49 40.0526 43.623 46 36.6 46H22C21.4477 46 21 45.5523 21 45V19C21 18.4477 21.4477 18 22 18H34Z" fill="white" fill-opacity="0.2"/>
+    <g transform="translate(4, 4) scale(0.875)">
+        <path d="M43.1213 18.8787L28 34L25.1716 31.1716L39.2929 17.0503L25.1716 2.92893L28 0.1L43.1213 15.1213C44.2929 16.2929 44.2929 18.1421 43.1213 19.3137V18.8787Z" fill="white"/>
+        <path d="M41 17L17 41L15 39L39 15L41 17Z" fill="white" fill-opacity="0.6"/>
+        <path d="M46 14L42 18L44 20L48 16L46 14Z" fill="white"/>
+    </g>
+</svg>

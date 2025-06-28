@@ -12,7 +12,7 @@ export default function TermsOfServicePage() {
 
                 <section className="mb-6">
                     <h2 className="text-2xl font-semibold font-serif mb-2">1. Agreement to Terms</h2>
-                    <p>By using our services, you agree to be bound by these Terms. If you don’t agree to be bound by these Terms, do not use the services. These terms govern your access to and use of our website, products, and services ("Products"). Please read these Terms carefully, and contact us if you have any questions.</p>
+                    <p>By using our services, you agree to be bound by these Terms. If you don&apos;t agree to be bound by these Terms, do not use the services. These terms govern your access to and use of our website, products, and services (&quot;Products&quot;). Please read these Terms carefully, and contact us if you have any questions.</p>
                 </section>
 
                 <section className="mb-6">

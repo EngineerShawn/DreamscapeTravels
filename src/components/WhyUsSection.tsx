@@ -26,7 +26,7 @@ export default function WhyUsSection() {
                         ))}
                     </div>
                 </div>
-                <div className="hidden md:block">
+                <div className="hidden md:block ">
                     <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2070&auto=format&fit=crop" alt="Travel agent planning" className="rounded-xl shadow-2xl w-full h-full object-cover" />
                 </div>
             </div>

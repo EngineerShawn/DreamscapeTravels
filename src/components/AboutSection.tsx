@@ -11,7 +11,7 @@ export default function AboutSection() {
                         <div className="flex gap-5 items-center">
                             <Avatar isBordered radius="full" size="lg" src="https://imgur.com/II44Aun.png" />
                             <div className="flex flex-col gap-1 items-start justify-center">
-                                <h4 className="text-lg font-semibold leading-none text-default-600">Tim Perry</h4>
+                                <h4 className="text-lg font-serif font-semibold leading-none text-default-600">Tim Perry</h4>
                                 <h5 className="text-sm tracking-tight text-default-400">Your Personal Escape Planner</h5>
                             </div>
                         </div>

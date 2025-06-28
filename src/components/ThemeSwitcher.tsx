@@ -45,13 +45,13 @@ export function ThemeSwitcher() {
                 </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="Theme Switcher">
-                <DropdownItem key="light" startContent={<SunIcon />} onClick={() => setTheme('light')}>
+                <DropdownItem key="light" startContent={<SunIcon />} onPress={() => setTheme('light')}>
                     Light
                 </DropdownItem>
-                <DropdownItem key="dark" startContent={<MoonIcon />} onClick={() => setTheme('dark')}>
+                <DropdownItem key="dark" startContent={<MoonIcon />} onPress={() => setTheme('dark')}>
                     Dark
                 </DropdownItem>
-                <DropdownItem key="system" startContent={<SystemIcon />} onClick={() => setTheme('system')}>
+                <DropdownItem key="system" startContent={<SystemIcon />} onPress={() => setTheme('system')}>
                     System
                 </DropdownItem>
             </DropdownMenu>

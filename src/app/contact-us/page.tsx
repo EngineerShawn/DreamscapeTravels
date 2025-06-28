@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 'use client';
 import React from "react";
 import AppNavbar from "@/components/AppNavbar";
@@ -19,12 +18,11 @@ export default function ContactUsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-zinc-900 flex flex-col">
-            {/* @ts-ignore */}
             <AppNavbar />
             <main className="flex-grow flex items-center justify-center p-8">
                 <div className="max-w-xl w-full bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-lg">
                     <h1 className="text-4xl font-bold font-serif mb-2 text-gray-900 dark:text-white">Contact Us</h1>
-                    <p className="text-gray-600 dark:text-gray-300 mb-6">Have an issue or a question? Fill out the form below and we'll get back to you.</p>
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">Have an issue or a question? Fill out the form below and we&apos;ll get back to you.</p>
 
                     {status === 'success' ? (
                         <div className="text-center py-10">
